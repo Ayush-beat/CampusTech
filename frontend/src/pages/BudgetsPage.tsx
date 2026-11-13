@@ -22,7 +22,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { MonthlyBudget, Category, CategoryBudget } from '../types';
-import { CurrencyDisplay, toNum } from '../components/common/CurrencyDisplay';
+import { CurrencyDisplay, toNum, roundPaise, formatINR } from '../components/common/CurrencyDisplay';
 
 interface BudgetsPageProps {
   categories: Category[];
@@ -40,7 +40,7 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
-  // Editable category allocations map { categoryId: amount }
+  // Editable category allocations map { categoryId: amount } (strictly numbers, never strings)
   const [allocations, setAllocations] = useState<Record<number, number>>({});
   const [totalBudgetInput, setTotalBudgetInput] = useState<string>('');
   const [allowanceInput, setAllowanceInput] = useState<string>('');
@@ -61,11 +61,12 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
       setHistoryData(hData || []);
 
       if (bData) {
-        setTotalBudgetInput(String(bData.total_budget));
-        setAllowanceInput(String(bData.total_allowance));
+        setTotalBudgetInput(String(roundPaise(bData.total_budget)));
+        setAllowanceInput(String(roundPaise(bData.total_allowance)));
         const allocMap: Record<number, number> = {};
         bData.category_budgets?.forEach((cb: CategoryBudget) => {
-          allocMap[cb.category_id] = cb.allocated_amount;
+          // Strictly parse as float and round to paise to prevent string concatenation bugs
+          allocMap[cb.category_id] = roundPaise(cb.allocated_amount);
         });
         setAllocations(allocMap);
       }
@@ -81,10 +82,19 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
   }, [year, month]);
 
   const handleAllocationChange = (catId: number, val: string) => {
-    const num = parseFloat(val) || 0;
+    // Prevent string concatenation, NaN, infinity, and negative numbers
+    if (val.trim() === '') {
+      setAllocations((prev) => ({
+        ...prev,
+        [catId]: 0,
+      }));
+      return;
+    }
+    const parsed = parseFloat(val);
+    const sanitized = isNaN(parsed) || !isFinite(parsed) ? 0 : Math.max(0, roundPaise(parsed));
     setAllocations((prev) => ({
       ...prev,
-      [catId]: num,
+      [catId]: sanitized,
     }));
   };
 
@@ -93,14 +103,17 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
     try {
       const catBudgetsList = Object.entries(allocations).map(([catId, amount]) => ({
         category_id: Number(catId),
-        allocated_amount: amount,
+        allocated_amount: roundPaise(amount),
       }));
+
+      const parsedTotal = parseFloat(totalBudgetInput);
+      const parsedAllowance = parseFloat(allowanceInput);
 
       const res = await api.saveBudget({
         year,
         month,
-        total_budget: parseFloat(totalBudgetInput) || 0,
-        total_allowance: parseFloat(allowanceInput) || 0,
+        total_budget: isNaN(parsedTotal) || parsedTotal < 0 ? 0 : roundPaise(parsedTotal),
+        total_allowance: isNaN(parsedAllowance) || parsedAllowance < 0 ? 0 : roundPaise(parsedAllowance),
         notes: `Updated budget for ${year}-${month}`,
         category_budgets: catBudgetsList,
       });
@@ -144,7 +157,10 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
     );
   }
 
-  const sumOfAllocations = Object.values(allocations).reduce((acc, curr) => acc + curr, 0);
+  const sumOfAllocations = Object.values(allocations).reduce(
+    (acc, curr) => roundPaise(acc + toNum(curr)),
+    0
+  );
 
   return (
     <div className="space-y-6">
@@ -161,16 +177,16 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
 
         <div className="flex items-center gap-2">
           {saveMessage && (
-            <span className="text-xs text-emerald-800 font-medium bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+            <span className="text-xs text-emerald-800 dark:text-sage font-medium bg-emerald-50 dark:bg-surface-muted px-2.5 py-1 rounded border border-emerald-200 dark:border-border-subtle">
               {saveMessage}
             </span>
           )}
           <button
             onClick={handleSaveBudget}
             disabled={isSaving}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-ledger shadow-sm disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-md bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-campustech shadow-sm disabled:opacity-50"
           >
-            <Save className="w-3.5 h-3.5 text-lime" />
+            <Save className="w-3.5 h-3.5 text-lime dark:text-sage" />
             <span>{isSaving ? 'Saving...' : 'Save Budget Allocations'}</span>
           </button>
         </div>
@@ -188,6 +204,7 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
             <input
               type="number"
               step="100"
+              min="0"
               value={allowanceInput}
               onChange={(e) => setAllowanceInput(e.target.value)}
               className="text-2xl font-semibold text-ink font-tabular bg-transparent border-b border-border-subtle focus:border-ledger w-full focus:outline-none"
@@ -208,14 +225,25 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
             <input
               type="number"
               step="100"
+              min="0"
               value={totalBudgetInput}
               onChange={(e) => setTotalBudgetInput(e.target.value)}
               className="text-2xl font-semibold text-ink font-tabular bg-transparent border-b border-border-subtle focus:border-ledger w-full focus:outline-none"
             />
           </div>
-          <p className="text-[11px] text-ink-muted mt-2">
-            Sum of category allocations: <strong className="font-tabular">₹{sumOfAllocations.toLocaleString('en-IN')}</strong>
-          </p>
+          <div className="flex items-center justify-between text-[11px] text-ink-muted mt-2">
+            <span>
+              Category Sum: <strong className="font-tabular text-ink">{formatINR(sumOfAllocations)}</strong>
+            </span>
+            <button
+              type="button"
+              onClick={() => setTotalBudgetInput(String(sumOfAllocations))}
+              className="text-ledger dark:text-sage font-medium hover:underline text-[10px]"
+              title="Set total budget equal to sum of category allocations"
+            >
+              Sync to Sum
+            </button>
+          </div>
         </div>
 
         {/* Current Month Spent & Utilization */}
@@ -293,10 +321,10 @@ export const BudgetsPage: React.FC<BudgetsPageProps> = ({
             <tbody className="divide-y divide-border-subtle">
               {categories.map((cat) => {
                 const cb = budget?.category_budgets?.find((b) => b.category_id === cat.id);
-                const currentAlloc = allocations[cat.id] !== undefined ? toNum(allocations[cat.id]) : toNum(cb?.allocated_amount);
-                const spent = toNum(cb?.spent_amount);
-                const remaining = currentAlloc - spent;
-                const utilPct = currentAlloc > 0 ? (spent / currentAlloc) * 100 : 0;
+                const currentAlloc = allocations[cat.id] !== undefined ? roundPaise(allocations[cat.id]) : roundPaise(cb?.allocated_amount);
+                const spent = roundPaise(cb?.spent_amount);
+                const remaining = roundPaise(currentAlloc - spent);
+                const utilPct = currentAlloc > 0 ? (spent / currentAlloc) * 100 : (spent > 0 ? 100 : 0);
                 const isOver = utilPct > 100;
                 const isWarn = utilPct >= 80 && !isOver;
 

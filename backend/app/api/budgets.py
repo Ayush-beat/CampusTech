@@ -140,6 +140,20 @@ def save_monthly_budget(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Validate non-negative numbers
+    if budget_in.total_budget < 0 or (budget_in.total_allowance and budget_in.total_allowance < 0):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Budget limit and monthly allowance must be non-negative."
+        )
+
+    for cb in (budget_in.category_budgets or []):
+        if cb.allocated_amount < 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Category allocation cannot be negative."
+            )
+
     budget = db.query(MonthlyBudget).filter(
         MonthlyBudget.user_id == current_user.id,
         MonthlyBudget.year == budget_in.year,

@@ -10,8 +10,15 @@ from app.models.budget import MonthlyBudget, CategoryBudget
 from app.models.planned_expense import PlannedExpense
 from app.models.savings_goal import SavingsGoal
 
-def round_currency(val: Decimal) -> Decimal:
-    """Rounds a decimal value to 2 decimal places using standard financial round half up."""
+def round_currency(val: Any) -> Decimal:
+    """Rounds any numeric or string representation to 2 decimal places using standard financial round half up."""
+    if val is None:
+        return Decimal("0.00")
+    if not isinstance(val, Decimal):
+        try:
+            val = Decimal(str(val))
+        except Exception:
+            return Decimal("0.00")
     return val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
 def get_month_days(year: int, month: int) -> int:

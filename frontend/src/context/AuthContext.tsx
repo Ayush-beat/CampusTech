@@ -21,11 +21,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('ledger_user');
+    const saved = localStorage.getItem('campustech_user') || localStorage.getItem('ledger_user');
     return saved ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('ledger_token');
+    return localStorage.getItem('campustech_token') || localStorage.getItem('ledger_token');
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -35,14 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [month, setMonth] = useState<number>(today.getMonth() + 1);
 
   const saveAuth = (tokenVal: string, userVal: User) => {
-    localStorage.setItem('ledger_token', tokenVal);
-    localStorage.setItem('ledger_user', JSON.stringify(userVal));
+    localStorage.setItem('campustech_token', tokenVal);
+    localStorage.setItem('campustech_user', JSON.stringify(userVal));
+    localStorage.removeItem('ledger_token');
+    localStorage.removeItem('ledger_user');
     setToken(tokenVal);
     setUser(userVal);
   };
 
   const refreshUser = async () => {
-    if (!localStorage.getItem('ledger_token')) {
+    const activeToken = localStorage.getItem('campustech_token') || localStorage.getItem('ledger_token');
+    if (!activeToken) {
       setUser(null);
       setIsLoading(false);
       return;
@@ -50,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const u = await api.getCurrentUser();
       setUser(u);
-      localStorage.setItem('ledger_user', JSON.stringify(u));
+      localStorage.setItem('campustech_user', JSON.stringify(u));
     } catch (err) {
       console.warn('Failed to refresh user profile:', err);
     } finally {
@@ -60,6 +63,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     refreshUser();
+
+    const handleAuthChange = () => {
+      refreshUser();
+    };
+    window.addEventListener('auth_change', handleAuthChange);
+    return () => window.removeEventListener('auth_change', handleAuthChange);
   }, []);
 
   const login = async (data: any) => {
@@ -93,10 +102,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    localStorage.removeItem('campustech_token');
+    localStorage.removeItem('campustech_user');
     localStorage.removeItem('ledger_token');
     localStorage.removeItem('ledger_user');
     setToken(null);
     setUser(null);
+    try {
+      api.logout();
+    } catch (e) {
+      // ignore
+    }
   };
 
   return (

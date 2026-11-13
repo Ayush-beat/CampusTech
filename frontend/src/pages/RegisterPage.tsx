@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, Mail, User, School, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { BrandLogo } from '../components/common/BrandLogo';
+import { ThemeToggle } from '../components/common/ThemeToggle';
 
 interface RegisterPageProps {
   onNavigateLogin: () => void;
@@ -33,7 +35,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
         full_name: fullName.trim(),
         email: email.trim(),
         password,
-        college_name: collegeName.trim() || 'Engineering Institute',
+        college_name: collegeName.trim() || 'College of Engineering & Tech',
         student_id: studentId.trim() || null,
         currency: 'INR',
       });
@@ -44,28 +46,27 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
 
   return (
     <div className="min-h-screen bg-canvas flex flex-col items-center justify-center p-4 selection:bg-lime selection:text-ledger-dark">
-      {/* Return Home Link */}
+      {/* Return Home Link & Theme Toggle */}
       <div className="w-full max-w-md mb-6 flex justify-between items-center">
         <button
           onClick={onNavigateHome}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted hover:text-ink transition-ledger"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted hover:text-ink transition-campustech"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Home</span>
         </button>
+
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-ledger flex items-center justify-center text-lime font-bold text-xs">
-            L.
-          </div>
-          <span className="font-semibold text-sm text-ink font-sans">ledger.</span>
+          <ThemeToggle compact={true} />
+          <BrandLogo size="sm" />
         </div>
       </div>
 
-      <div className="w-full max-w-md bg-paper border border-border-subtle rounded-ledger p-8 shadow-elevated">
+      <div className="w-full max-w-md bg-paper border border-border-subtle rounded-ledger p-8 shadow-elevated transition-campustech">
         <div className="mb-6 text-center">
-          <h2 className="text-xl font-semibold text-ink font-sans">Create your student profile</h2>
+          <h2 className="text-xl font-semibold text-ink font-sans">Create your CampusTech account</h2>
           <p className="text-xs text-ink-muted mt-1">
-            Start tracking expenses with intelligent student-tailored insights
+            Student financial intelligence, isolated and private to you
           </p>
         </div>
 
@@ -79,7 +80,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
             type="button"
             onClick={() => quickDemoLogin()}
             disabled={isLoading}
-            className="px-3 py-1.5 rounded bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-ledger shrink-0"
+            className="px-3 py-1.5 rounded bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-campustech shrink-0"
           >
             Demo Login
           </button>
@@ -103,15 +104,15 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="e.g. Priya Nair"
-                className="w-full pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-ledger"
+                placeholder="Aarav Sharma"
+                className="w-full pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-campustech"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-ink-muted mb-1">
-              College Email *
+              College Email Address *
             </label>
             <div className="relative">
               <Mail className="absolute left-3 top-2.5 w-4 h-4 text-ink-muted" />
@@ -121,7 +122,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="student@college.edu"
-                className="w-full pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-ledger"
+                className="w-full pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-campustech"
               />
             </div>
           </div>
@@ -136,58 +137,68 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({
                 type="text"
                 value={collegeName}
                 onChange={(e) => setCollegeName(e.target.value)}
-                placeholder="e.g. Delhi Technological University (DTU)"
-                className="w-full pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-ledger"
+                placeholder="e.g. Delhi Technological University"
+                className="w-full pl-9 pr-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-campustech"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-ink-muted mb-1">
-              Password (min. 6 chars) *
+              Roll / Student ID (Optional)
+            </label>
+            <input
+              type="text"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+              placeholder="e.g. 2024-CS-042"
+              className="w-full px-3 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-campustech"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-ink-muted mb-1">
+              Password *
             </label>
             <div className="relative">
               <Lock className="absolute left-3 top-2.5 w-4 h-4 text-ink-muted" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
-                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-9 pr-10 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-ledger"
+                placeholder="At least 6 characters"
+                className="w-full pl-9 pr-10 py-2 bg-canvas border border-border-subtle rounded-md text-xs sm:text-sm text-ink focus:border-ledger focus:bg-paper transition-campustech"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-2.5 text-ink-muted hover:text-ink"
-                aria-label="Toggle password visibility"
+                title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-2.5 px-4 rounded-md bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-ledger flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
-            >
-              <span>{isLoading ? 'Creating profile...' : 'Create Student Account'}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-lime" />
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-2.5 px-4 bg-ledger text-paper rounded-md text-xs font-medium hover:bg-ledger-light transition-campustech shadow-sm flex items-center justify-center gap-2 mt-2"
+          >
+            <span>{isLoading ? 'Creating account...' : 'Create Student Account'}</span>
+            <ArrowRight className="w-3.5 h-3.5 text-lime" />
+          </button>
         </form>
 
-        <div className="mt-6 pt-4 border-t border-border-subtle text-center">
+        <div className="mt-5 pt-4 border-t border-border-subtle text-center">
           <p className="text-xs text-ink-muted">
-            Already registered?{' '}
+            Already have an account?{' '}
             <button
               onClick={onNavigateLogin}
-              className="font-medium text-ledger hover:underline"
+              className="font-medium text-ledger dark:text-lime hover:underline"
             >
-              Sign in
+              Sign in instead
             </button>
           </p>
         </div>

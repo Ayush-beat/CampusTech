@@ -55,7 +55,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       case 'settings':
         return 'Settings & Profile';
       default:
-        return 'Ledger.';
+        return 'CampusTech';
     }
   };
 

@@ -131,7 +131,7 @@ export const AssistantPage: React.FC = () => {
               >
                 <div className="flex items-center justify-between gap-4">
                   <span className="font-semibold text-[11px] opacity-80 uppercase tracking-wider">
-                    {m.sender === 'user' ? 'You' : 'Ledger Analytics'}
+                    {m.sender === 'user' ? 'You' : 'CampusTech Intelligence'}
                   </span>
                   <div className="flex items-center gap-2">
                     {m.isPrediction && (

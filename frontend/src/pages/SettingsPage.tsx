@@ -7,13 +7,18 @@ import {
   Shield,
   School,
   Wallet,
-  Bell
+  Bell,
+  Sun,
+  Moon,
+  Laptop
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/client';
 
 export const SettingsPage: React.FC = () => {
   const { user, refreshUser } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [monthlyAllowance, setMonthlyAllowance] = useState('15000');
   const [safeSpendBuffer, setSafeSpendBuffer] = useState('500');
   const [alert80, setAlert80] = useState(true);
@@ -128,6 +133,60 @@ export const SettingsPage: React.FC = () => {
               {user?.student_id || 'Not specified'}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Appearance & Theme Card */}
+      <div className="bg-paper border border-border-subtle rounded-ledger p-6 shadow-subtle space-y-4">
+        <div className="flex items-center gap-2 pb-3 border-b border-border-subtle">
+          <Sun className="w-4 h-4 text-ledger dark:text-lime" />
+          <h3 className="text-sm font-semibold text-ink uppercase tracking-wider">
+            Appearance & Theme
+          </h3>
+        </div>
+        <p className="text-xs text-ink-muted">
+          Select your visual theme preference. All charts, tables, and financial indicators adapt seamlessly.
+        </p>
+
+        <div className="grid grid-cols-3 gap-3 pt-1">
+          <button
+            type="button"
+            onClick={() => setTheme('light')}
+            className={`p-3 rounded-md border text-xs font-medium flex flex-col items-center gap-2 transition-campustech ${
+              theme === 'light'
+                ? 'bg-surface-muted border-ledger text-ledger font-semibold shadow-sm'
+                : 'bg-canvas border-border-subtle text-ink-muted hover:text-ink'
+            }`}
+          >
+            <Sun className="w-4 h-4" />
+            <span>Light</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTheme('dark')}
+            className={`p-3 rounded-md border text-xs font-medium flex flex-col items-center gap-2 transition-campustech ${
+              theme === 'dark'
+                ? 'bg-surface-muted border-ledger dark:border-lime text-ledger dark:text-lime font-semibold shadow-sm'
+                : 'bg-canvas border-border-subtle text-ink-muted hover:text-ink'
+            }`}
+          >
+            <Moon className="w-4 h-4" />
+            <span>Dark</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTheme('system')}
+            className={`p-3 rounded-md border text-xs font-medium flex flex-col items-center gap-2 transition-campustech ${
+              theme === 'system'
+                ? 'bg-surface-muted border-ledger dark:border-lime text-ledger dark:text-lime font-semibold shadow-sm'
+                : 'bg-canvas border-border-subtle text-ink-muted hover:text-ink'
+            }`}
+          >
+            <Laptop className="w-4 h-4" />
+            <span>System</span>
+          </button>
         </div>
       </div>
 

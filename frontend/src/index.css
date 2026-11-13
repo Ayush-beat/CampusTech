@@ -6,22 +6,82 @@
 
 @layer base {
   :root {
-    --bg-canvas: #F7F7F2;
-    --text-ink: #252A27;
+    --color-canvas: #F7F7F2;
+    --color-paper: #FFFFFF;
+    --color-surface-elevated: #FFFFFF;
+    --color-ink: #252A27;
+    --color-ink-light: #535B56;
+    --color-ink-muted: #76807A;
+    --color-ink-subtle: #A2ABA6;
+    --color-border-subtle: #E5E5DF;
+    --color-border-muted: #D8D8CF;
+    --color-surface-muted: #ECEEE7;
+    --color-surface-soft: #F2F4ED;
+    --color-surface-card: #FFFFFF;
+    --color-ledger: #163D32;
+    --color-ledger-dark: #0E2922;
+    --color-ledger-light: #235A4B;
+    --color-ledger-soft: #EAF1EE;
+    --color-accent-sage: #B9D9C4;
+    --color-warning: #D97706;
+    --color-error: #B95D43;
+    --color-lime-soft: #F4FEE2;
+    --color-terracotta: #B95D43;
+    --color-terracotta-light: #FAEDE9;
+    --color-terracotta-dark: #93442E;
+    --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    --shadow-elevated: 0 4px 12px 0 rgba(22, 61, 50, 0.05);
+    color-scheme: light;
+  }
+
+  .dark {
+    /* Art-directed dark mode palette per specification */
+    --color-canvas: #101713;       /* App background */
+    --color-paper: #1B2620;        /* Card background */
+    --color-surface-elevated: #24332A; /* Elevated surface */
+    --color-ink: #E8F0EA;          /* Primary text */
+    --color-ink-light: #C5D4CB;
+    --color-ink-muted: #A0B4A7;    /* Secondary text */
+    --color-ink-subtle: #6A7E73;
+    --color-border-subtle: #34443A;/* Border */
+    --color-border-muted: #43574B;
+    --color-surface-muted: #24332A;
+    --color-surface-soft: #16201A;
+    --color-surface-card: #1B2620;
+    --color-ledger: #245A45;
+    --color-ledger-dark: #1A3F31;
+    --color-ledger-light: #34765C;
+    --color-ledger-soft: #1E2D24;
+    --color-accent-sage: #B9D9C4;  /* Soft sage accent */
+    --color-warning: #F2C078;      /* Warning */
+    --color-error: #F08C84;        /* Error */
+    --color-lime-soft: #1D2C22;
+    --color-terracotta: #F08C84;
+    --color-terracotta-light: #301E1C;
+    --color-terracotta-dark: #F5A9A3;
+    --shadow-subtle: 0 1px 3px 0 rgba(0, 0, 0, 0.45);
+    --shadow-elevated: 0 4px 16px 0 rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
   }
 
   body {
-    background-color: #F7F7F2;
-    color: #252A27;
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
+    transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), color 180ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Accessible focus indicators */
   *:focus-visible {
-    outline: 2px solid #163D32;
+    outline: 2px solid var(--color-ledger);
+    outline-offset: 2px;
+  }
+
+  .dark *:focus-visible {
+    outline: 2px solid #B9D9C4;
     outline-offset: 2px;
   }
 }
@@ -32,27 +92,28 @@
   letter-spacing: -0.02em;
 }
 
-/* Custom scrollbars that match the subtle border theme */
+/* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F7F7F2;
+  background: var(--color-canvas);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D8D8CF;
+  background: var(--color-border-muted);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A2ABA6;
+  background: var(--color-ink-subtle);
 }
 
 /* Animation durations conforming to prompt: 150-220ms */
-.transition-ledger {
+.transition-ledger,
+.transition-campustech {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   transition-duration: 180ms;

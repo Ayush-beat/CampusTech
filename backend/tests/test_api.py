@@ -58,4 +58,4 @@ def test_quick_demo_login(client):
     assert res.status_code == 200
     data = res.json()
     assert "access_token" in data
-    assert data["user"]["email"] == "aarav.student@ledger.app"
+    assert data["user"]["email"] == "demo.student@campustech.app"

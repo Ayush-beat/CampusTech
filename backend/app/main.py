@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Intelligent Student Expense Analytics and Budgeting Platform API",
+    description="CampusTech — Student Financial Intelligence Platform API",
     lifespan=lifespan
 )
 
@@ -56,7 +56,7 @@ app.include_router(seed_router, prefix=settings.API_V1_STR)
 def health_check():
     return {
         "status": "healthy",
-        "service": "ledger-api",
+        "service": "campustech-api",
         "version": settings.VERSION
     }
 

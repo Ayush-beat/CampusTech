@@ -74,7 +74,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         user_id=user.id,
         badge_code="first_step",
         name="Financial Pioneer",
-        description="Joined Ledger. and took control of your student finances.",
+        description="Joined CampusTech and took control of your student finances.",
         icon="Award"
     )
     db.add(achievement)

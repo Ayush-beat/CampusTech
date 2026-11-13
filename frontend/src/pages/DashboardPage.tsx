@@ -26,6 +26,7 @@ import {
   Cell,
 } from 'recharts';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/client';
 import { DashboardData, CategoryDistributionItem, SpendingTrendItem } from '../types';
 import { StatCard } from '../components/common/StatCard';
@@ -42,6 +43,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onOpenAddExpense,
 }) => {
   const { user, year, month } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  const chartBorder = isDark ? '#242E28' : '#E5E5DF';
+  const chartTick = isDark ? '#8E9A93' : '#76807A';
+  const chartTooltipBg = isDark ? '#161D1A' : '#FFFFFF';
+  const chartAreaStroke = isDark ? '#307B65' : '#163D32';
+
   const [data, setData] = useState<DashboardData | null>(null);
   const [trendData, setTrendData] = useState<SpendingTrendItem[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryDistributionItem[]>([]);
@@ -89,6 +98,35 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   }
 
   if (error || !data) {
+    const isNoExpenseError =
+      error &&
+      (error.toLowerCase().includes('no expense') ||
+        error.toLowerCase().includes('empty') ||
+        error.toLowerCase().includes('not found'));
+
+    if (isNoExpenseError) {
+      return (
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border-subtle">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-semibold text-ink tracking-tight font-sans">
+                Welcome, {user?.full_name?.split(' ')[0] || 'Student'}.
+              </h2>
+              <p className="text-xs text-ink-muted mt-0.5">
+                Ready to track your campus finances.
+              </p>
+            </div>
+          </div>
+          <EmptyState
+            title="No expenses recorded yet"
+            description="You don't have any recorded expenses for this account yet. Add your first expense to activate your financial dashboard."
+            actionText="Add Expense"
+            onAction={onOpenAddExpense}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="p-6 bg-terracotta-light text-terracotta rounded-ledger border border-terracotta/20">
         <h3 className="font-semibold text-sm">Failed to load dashboard</h3>
@@ -104,12 +142,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   }
 
   const { financial_summary, safe_to_spend, projection, period } = data;
+  const hasNoExpenses =
+    toNum(financial_summary.total_expenses) === 0 && data.recent_transactions.length === 0;
 
   const projectionBadgeVariant =
     projection.status === 'on_track'
       ? 'positive'
       : projection.status === 'likely_overrun'
       ? 'warning'
+      : projection.status === 'no_budget_set'
+      ? 'neutral'
       : 'alert';
 
   return (
@@ -136,10 +178,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-ledger shadow-sm"
           >
             <Plus className="w-3.5 h-3.5 text-lime" />
-            <span>Record Expense</span>
+            <span>Add Expense</span>
           </button>
         </div>
       </div>
+
+      {/* If user has no expenses yet, show a welcoming empty state banner */}
+      {hasNoExpenses && (
+        <div className="bg-paper border border-border-subtle rounded-ledger p-5 shadow-subtle flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-ledger/10 text-ledger flex items-center justify-center shrink-0">
+              <Wallet className="w-5 h-5 text-ledger" />
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-ink">No expenses recorded yet</h3>
+              <p className="text-xs text-ink-muted mt-0.5">
+                Start logging your campus spending to calculate daily safe-to-spend allowances and track category budgets.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onOpenAddExpense}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-ledger text-paper text-xs font-medium hover:bg-ledger-light transition-ledger shadow-sm shrink-0"
+          >
+            <Plus className="w-3.5 h-3.5 text-lime" />
+            <span>Add Expense</span>
+          </button>
+        </div>
+      )}
 
       {/* 2. Top Metric Cards: Distinguish Available Balance from Budget */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -190,7 +256,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               : `Estimated Overrun: ₹${Math.abs(projection.projected_difference).toLocaleString('en-IN')}`
           }
           badge={{
-            text: projection.status === 'on_track' ? 'On Track' : 'Pacing Alert',
+            text:
+              projection.status === 'on_track'
+                ? 'On Track'
+                : projection.status === 'no_budget_set'
+                ? 'No Budget'
+                : 'Pacing Alert',
             variant: projectionBadgeVariant,
           }}
         />
@@ -223,37 +294,38 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
               <AreaChart data={trendData}>
                 <defs>
                   <linearGradient id="ledgerGreenGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#163D32" stopOpacity={0.25} />
-                    <stop offset="95%" stopColor="#163D32" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={chartAreaStroke} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={chartAreaStroke} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 10, fill: '#76807A' }}
+                  tick={{ fontSize: 10, fill: chartTick }}
                   tickLine={false}
-                  axisLine={{ stroke: '#E5E5DF' }}
+                  axisLine={{ stroke: chartBorder }}
                   interval="preserveStartEnd"
                 />
                 <YAxis
-                  tick={{ fontSize: 10, fill: '#76807A' }}
+                  tick={{ fontSize: 10, fill: chartTick }}
                   tickLine={false}
-                  axisLine={{ stroke: '#E5E5DF' }}
+                  axisLine={{ stroke: chartBorder }}
                   tickFormatter={(val) => `₹${val}`}
                 />
                 <Tooltip
                   formatter={(value: any) => [`₹${Number(value).toFixed(2)}`, 'Spent']}
                   contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: '#E5E5DF',
+                    backgroundColor: chartTooltipBg,
+                    borderColor: chartBorder,
                     borderRadius: '8px',
                     fontSize: '12px',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                    color: isDark ? '#EFF2EE' : '#252A27',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   }}
                 />
                 <Area
                   type="monotone"
                   dataKey="amount"
-                  stroke="#163D32"
+                  stroke={chartAreaStroke}
                   strokeWidth={2}
                   fillOpacity={1}
                   fill="url(#ledgerGreenGradient)"
@@ -282,10 +354,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {categoryData.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center py-4">
               <EmptyState
                 title="No expenses this month"
                 description="Add your first transaction to see category breakdown."
+                actionText="Add Expense"
+                onAction={onOpenAddExpense}
               />
             </div>
           ) : (
@@ -308,10 +382,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     <Tooltip
                       formatter={(value: any) => [`₹${Number(value).toFixed(2)}`, 'Amount']}
                       contentStyle={{
-                        backgroundColor: '#FFFFFF',
-                        borderColor: '#E5E5DF',
+                        backgroundColor: chartTooltipBg,
+                        borderColor: chartBorder,
                         borderRadius: '8px',
                         fontSize: '11px',
+                        color: isDark ? '#EFF2EE' : '#252A27',
                       }}
                     />
                   </PieChart>
@@ -569,8 +644,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <tbody className="divide-y divide-border-subtle">
               {data.recent_transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-ink-muted">
-                    No transactions recorded for this period.
+                  <td colSpan={5} className="py-8 text-center text-ink-muted">
+                    <EmptyState
+                      title="No expenses recorded yet"
+                      description="Log your daily campus purchases to monitor budget utilization."
+                      actionText="Add Expense"
+                      onAction={onOpenAddExpense}
+                    />
                   </td>
                 </tr>
               ) : (

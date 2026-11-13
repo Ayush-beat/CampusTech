@@ -25,6 +25,7 @@ import {
   Legend,
 } from 'recharts';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { api } from '../api/client';
 import { SpendingTrendItem, CategoryDistributionItem, BudgetVsActualItem } from '../types';
 import { StatCard } from '../components/common/StatCard';
@@ -33,6 +34,14 @@ import { EmptyState } from '../components/common/EmptyState';
 
 export const AnalyticsPage: React.FC = () => {
   const { year, month } = useAuth();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  const chartBorder = isDark ? '#242E28' : '#E5E5DF';
+  const chartTick = isDark ? '#8E9A93' : '#76807A';
+  const chartTooltipBg = isDark ? '#161D1A' : '#FFFFFF';
+  const chartAreaStroke = isDark ? '#307B65' : '#163D32';
+
   const [trendData, setTrendData] = useState<SpendingTrendItem[]>([]);
   const [categoryData, setCategoryData] = useState<CategoryDistributionItem[]>([]);
   const [budgetVsActual, setBudgetVsActual] = useState<BudgetVsActualItem[]>([]);
@@ -149,19 +158,20 @@ export const AnalyticsPage: React.FC = () => {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={budgetVsActual}>
-                <XAxis dataKey="category_name" tick={{ fontSize: 10, fill: '#76807A' }} interval={0} angle={-15} textAnchor="end" height={50} />
-                <YAxis tick={{ fontSize: 10, fill: '#76807A' }} tickFormatter={(v) => `₹${v}`} />
+                <XAxis dataKey="category_name" tick={{ fontSize: 10, fill: chartTick }} interval={0} angle={-15} textAnchor="end" height={50} />
+                <YAxis tick={{ fontSize: 10, fill: chartTick }} tickFormatter={(v) => `₹${v}`} />
                 <Tooltip
                   formatter={(val: any) => [`₹${Number(val).toFixed(2)}`]}
                   contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: '#E5E5DF',
+                    backgroundColor: chartTooltipBg,
+                    borderColor: chartBorder,
                     borderRadius: '8px',
                     fontSize: '12px',
+                    color: isDark ? '#EFF2EE' : '#252A27',
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Bar dataKey="budgeted" name="Budgeted Limit" fill="#235A4B" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="budgeted" name="Budgeted Limit" fill={isDark ? '#2D7863' : '#235A4B'} radius={[4, 4, 0, 0]} />
                 <Bar dataKey="actual" name="Actual Spent" fill="#D8FF65" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -184,22 +194,23 @@ export const AnalyticsPage: React.FC = () => {
               <AreaChart data={trendData}>
                 <defs>
                   <linearGradient id="analyticsTrend" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#163D32" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#163D32" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor={chartAreaStroke} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={chartAreaStroke} stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#76807A' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#76807A' }} tickFormatter={(v) => `₹${v}`} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: chartTick }} />
+                <YAxis tick={{ fontSize: 10, fill: chartTick }} tickFormatter={(v) => `₹${v}`} />
                 <Tooltip
                   formatter={(val: any) => [`₹${Number(val).toFixed(2)}`, 'Spent']}
                   contentStyle={{
-                    backgroundColor: '#FFFFFF',
-                    borderColor: '#E5E5DF',
+                    backgroundColor: chartTooltipBg,
+                    borderColor: chartBorder,
                     borderRadius: '8px',
                     fontSize: '12px',
+                    color: isDark ? '#EFF2EE' : '#252A27',
                   }}
                 />
-                <Area type="monotone" dataKey="amount" stroke="#163D32" strokeWidth={2} fill="url(#analyticsTrend)" />
+                <Area type="monotone" dataKey="amount" stroke={chartAreaStroke} strokeWidth={2} fill="url(#analyticsTrend)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

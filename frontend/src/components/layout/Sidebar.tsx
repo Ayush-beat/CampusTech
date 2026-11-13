@@ -19,6 +19,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { BrandLogo } from '../common/BrandLogo';
 
 export type NavTab =
   | 'overview'
@@ -85,23 +86,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 border-b border-border-subtle flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-ledger flex items-center justify-center text-lime font-bold text-sm tracking-tight shadow-sm">
-              L.
-            </div>
-            <div>
-              <span className="font-semibold text-base tracking-tight text-ledger-dark font-sans">
-                ledger<span className="text-lime-dark">.</span>
-              </span>
-              <p className="text-[10px] uppercase tracking-wider text-ink-muted -mt-0.5 font-medium">
-                Student Financial OS
-              </p>
-            </div>
-          </div>
+        <div className="h-16 px-5 border-b border-border-subtle flex items-center justify-between">
+          <BrandLogo size="sm" showDescriptor={true} />
           <button
             onClick={onClose}
             className="p-1 rounded text-ink-muted hover:text-ink lg:hidden"
+            aria-label="Close Sidebar"
           >
             <X className="w-5 h-5" />
           </button>
@@ -128,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onSelectTab(item.id);
                     onClose();
                   }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium transition-ledger text-left ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-xs font-medium transition-campustech text-left ${
                     isActive
                       ? 'bg-ledger text-paper shadow-sm'
                       : 'text-ink-light hover:bg-surface-muted hover:text-ink'
@@ -150,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 border-t border-border-subtle bg-surface-soft/60">
           <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-md">
             <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-ledger-soft text-ledger font-semibold text-xs flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-ledger-soft dark:bg-surface-muted text-ledger dark:text-lime font-semibold text-xs flex items-center justify-center shrink-0 border border-border-subtle">
                 {user?.full_name ? user.full_name[0].toUpperCase() : 'U'}
               </div>
               <div className="overflow-hidden">
@@ -158,14 +148,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {user?.full_name || 'Student User'}
                 </p>
                 <p className="text-[10px] text-ink-muted truncate">
-                  {user?.college_name || 'Engineering Campus'}
+                  {user?.college_name || 'Campus Member'}
                 </p>
               </div>
             </div>
             <button
               onClick={logout}
               title="Sign Out"
-              className="p-1.5 text-ink-muted hover:text-terracotta hover:bg-terracotta-light rounded transition-ledger"
+              className="p-1.5 text-ink-muted hover:text-terracotta hover:bg-terracotta-light rounded transition-campustech"
             >
               <LogOut className="w-4 h-4" />
             </button>

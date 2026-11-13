@@ -3,15 +3,15 @@ from typing import List
 import os
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "ledger. — Student Financial OS"
+    PROJECT_NAME: str = "CampusTech — Student Financial Intelligence"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api"
     
     # Database URL: default to SQLite for instant local dev, switchable to MySQL seamlessly
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./ledger.db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./campustech.db")
     
     # JWT & Security
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "ledger-super-secret-production-key-2026-student-finance-os")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "campustech-super-secret-production-key-2026-student-finance-os")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     

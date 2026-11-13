@@ -2,23 +2,27 @@ import React from 'react';
 
 export const toNum = (val: any): number => {
   if (val === null || val === undefined) return 0;
-  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  if (typeof val === 'number') return isNaN(val) || !isFinite(val) ? 0 : val;
   const parsed = parseFloat(String(val));
-  return isNaN(parsed) ? 0 : parsed;
+  return isNaN(parsed) || !isFinite(parsed) ? 0 : parsed;
+};
+
+export const roundPaise = (val: any): number => {
+  const num = toNum(val);
+  return Math.round((num + Number.EPSILON) * 100) / 100;
 };
 
 export const formatINR = (val: any, showDecimals = true): string => {
-  const numeric = toNum(val);
-  const parts = Math.abs(numeric).toFixed(showDecimals ? 2 : 0).split('.');
-  let lastThree = parts[0].substring(parts[0].length - 3);
-  const otherNumbers = parts[0].substring(0, parts[0].length - 3);
-  if (otherNumbers !== '') {
-    lastThree = ',' + lastThree;
-  }
-  const formatted = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + lastThree;
-  const dec = showDecimals && parts[1] ? `.${parts[1]}` : '';
-  const sign = numeric < 0 ? '-' : '';
-  return `${sign}₹${formatted}${dec}`;
+  const numeric = roundPaise(val);
+  const isNegative = numeric < 0;
+  const absVal = Math.abs(numeric);
+
+  const formatted = new Intl.NumberFormat('en-IN', {
+    minimumFractionDigits: showDecimals ? 2 : 0,
+    maximumFractionDigits: showDecimals ? 2 : 0,
+  }).format(absVal);
+
+  return `${isNegative ? '-' : ''}₹${formatted}`;
 };
 
 interface CurrencyDisplayProps {

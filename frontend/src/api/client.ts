@@ -1,8 +1,12 @@
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (typeof window !== 'undefined' && window.location.origin.includes(':5173')
+    ? `${window.location.origin}/api`
+    : 'http://127.0.0.1:8000/api');
 
 class ApiClient {
   private getHeaders(): HeadersInit {
-    const token = localStorage.getItem('ledger_token');
+    const token = localStorage.getItem('campustech_token') || localStorage.getItem('ledger_token');
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
@@ -20,6 +24,8 @@ class ApiClient {
       const response = await fetch(url, { ...options, headers });
 
       if (response.status === 401) {
+        localStorage.removeItem('campustech_token');
+        localStorage.removeItem('campustech_user');
         localStorage.removeItem('ledger_token');
         localStorage.removeItem('ledger_user');
         window.dispatchEvent(new Event('auth_change'));
@@ -61,6 +67,12 @@ class ApiClient {
     return this.request<any>('/seed/quick-demo-login', {
       method: 'POST',
     });
+  }
+
+  logout() {
+    return this.request<any>('/auth/logout', {
+      method: 'POST',
+    }).catch(() => ({}));
   }
 
   resetDemoData() {

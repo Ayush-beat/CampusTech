@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { api } from '../api/client';
 import { CurrencyDisplay, toNum } from '../components/common/CurrencyDisplay';
+import { BrandLogo } from '../components/common/BrandLogo';
 
 export const ReportsPage: React.FC = () => {
   const { year, month, user } = useAuth();
@@ -87,16 +88,11 @@ export const ReportsPage: React.FC = () => {
         {/* Document Header */}
         <div className="flex items-start justify-between border-b-2 border-ledger pb-6 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-7 h-7 rounded bg-ledger text-lime flex items-center justify-center font-bold text-xs">
-                L.
-              </div>
-              <span className="text-lg font-bold text-ledger-dark font-sans tracking-tight">
-                ledger.
-              </span>
+            <div className="mb-2">
+              <BrandLogo size="md" />
             </div>
             <p className="text-xs text-ink-muted uppercase tracking-wider font-semibold">
-              Student Expense Statement
+              Student Financial Intelligence Statement
             </p>
             <h3 className="text-xl font-serif text-ink mt-2">
               {reportData?.report_title}
@@ -216,7 +212,7 @@ export const ReportsPage: React.FC = () => {
         {/* Footer Statement */}
         <div className="pt-6 border-t border-border-subtle text-center text-[11px] text-ink-muted space-y-1">
           <p className="font-medium text-ink">
-            Ledger. — Intelligent Student Expense Analytics & Budgeting Platform
+            CampusTech — Student Financial Intelligence
           </p>
           <p>This statement summarizes student-managed financial records for educational tracking purposes.</p>
         </div>

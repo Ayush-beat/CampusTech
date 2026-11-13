@@ -160,7 +160,7 @@ def create_expense(
         achieve = Achievement(
             user_id=current_user.id,
             badge_code="first_expense",
-            name="Ledger Initiate",
+            name="CampusTech Initiate",
             description="Recorded your very first expense entry.",
             icon="CheckCircle"
         )

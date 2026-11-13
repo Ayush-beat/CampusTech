@@ -13,6 +13,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
 import { NotificationItem } from '../../types';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface TopbarProps {
   title: string;
@@ -156,6 +157,9 @@ export const Topbar: React.FC<TopbarProps> = ({
           <Plus className="w-4 h-4 text-lime" />
           <span>Add Expense</span>
         </button>
+
+        {/* Theme Selector */}
+        <ThemeToggle compact={true} />
 
         {/* Notifications Dropdown */}
         <div className="relative">

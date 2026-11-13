@@ -33,7 +33,7 @@ def export_csv(
         category_id=category_id
     )
 
-    filename = f"ledger_expenses_{year or 'all'}_{month or 'all'}.csv"
+    filename = f"campustech_expenses_{year or 'all'}_{month or 'all'}.csv"
     return Response(
         content=csv_data,
         media_type="text/csv",

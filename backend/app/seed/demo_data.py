@@ -14,7 +14,7 @@ from app.models.achievement import Achievement
 from app.core.security import get_password_hash
 from app.services.insights import generate_insights_and_alerts
 
-DEMO_USER_EMAIL = "aarav.student@ledger.app"
+DEMO_USER_EMAIL = "demo.student@campustech.app"
 DEMO_USER_PASSWORD = "Password@123"
 
 def seed_demo_student(db: Session) -> User:
@@ -22,10 +22,11 @@ def seed_demo_student(db: Session) -> User:
     Creates or resets the synthetic demo student profile with realistic multi-month records.
     """
     # 1. Clean up existing demo user records if any
-    existing_user = db.query(User).filter(User.email == DEMO_USER_EMAIL).first()
-    if existing_user:
-        db.delete(existing_user)
-        db.commit()
+    for old_email in [DEMO_USER_EMAIL, "aarav.student@ledger.app", "aarav.student@campustech.app"]:
+        old_user = db.query(User).filter(User.email == old_email).first()
+        if old_user:
+            db.delete(old_user)
+            db.commit()
 
     # 2. Create Demo User
     demo_user = User(
@@ -260,8 +261,8 @@ def seed_demo_student(db: Session) -> User:
 
     # 10. Achievements
     achievements = [
-        ("first_step", "Financial Pioneer", "Joined Ledger. and took control of student finances.", "Award"),
-        ("first_expense", "Ledger Initiate", "Recorded your first student expense entry.", "CheckCircle"),
+        ("first_step", "Financial Pioneer", "Joined CampusTech and took control of student finances.", "Award"),
+        ("first_expense", "CampusTech Initiate", "Recorded your first student expense entry.", "CheckCircle"),
         ("budget_master", "Budget Strategist", "Configured an intentional monthly budget allocation.", "Compass"),
         ("semester_planner", "Academic Foresight", "Created your first semester planned commitment.", "GraduationCap"),
         ("goal_setter", "Future Builder", "Established your first student savings target.", "Target"),
