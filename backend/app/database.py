@@ -1,20 +1,31 @@
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from app.config import settings
 
+# SQLite-specific connection settings
 connect_args = {}
+
 if settings.DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
+# Create database engine
 engine = create_engine(
     settings.DATABASE_URL,
     connect_args=connect_args,
     pool_pre_ping=True
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Create database session
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
+# Base class for database models
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
@@ -23,6 +34,12 @@ def get_db():
     finally:
         db.close()
 
+
 def init_db():
     import app.models  # Ensure all models are registered
-    Base.metadata.create_all(bind=engine)
+
+    # Create only tables that do not already exist
+    Base.metadata.create_all(
+        bind=engine,
+        checkfirst=True
+    )
