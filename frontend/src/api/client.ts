@@ -1,8 +1,5 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ||
-  (typeof window !== 'undefined' && window.location.origin.includes(':5173')
-    ? `${window.location.origin}/api`
-    : 'http://127.0.0.1:8000/api');
+  import.meta.env.VITE_API_BASE_URL || '/api';
 
 class ApiClient {
   private getHeaders(): HeadersInit {
